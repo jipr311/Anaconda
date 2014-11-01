@@ -43,13 +43,14 @@ server_sock = 0
 client_sock = 0
 
 #ultrasound Variable
-TriggerPin = 23
-EchoPin = 24
+TriggerPin = 24
+EchoPin = 23
+distance = '---'
+sounds_Speed = 34300
 
 def signalHandler(signal, frame):
 	print("Code interupted!")
 	sys.exit(0)
-
 
 def read_byte(adr):
 	return bus.read_byte_data(address, adr)
@@ -71,10 +72,10 @@ def prepareUltraSoundPins():
 	GPIO.setmode(GPIO.BCM)
 	GPIO.setwarnings(False)
 	global TriggerPin, EchoPin
-	#TriggerPin = 23
-	#EchoPin = 24
+
 	GPIO.setup(TriggerPin, GPIO.OUT)
 	GPIO.setup(EchoPin, GPIO.IN)
+	
 	GPIO.output(TriggerPin, False)
 	time.sleep(2)
 	print (colored("GPIO ready for use...", 'green'))
@@ -88,23 +89,36 @@ def firePulseTrain():
 	print (colored("Pulse's Train fired!", 'green'))
 	
 def waitForEcho():
+	global distance, EchoPin, soundsSpeed
 	print (colored("Listening for Echo", 'green'))
+	timeStart = 0
+	timeEnd = 0
 	while GPIO.input(EchoPin) == 0:
 		timeStart = time.time()
 	while GPIO.input(EchoPin) == 1:
 		timeEnd = time.time()
 	trainLenght = timeEnd - timeStart
-	soundsSpeed = 34300
-	distance = trainLenght * soundsSpeed / 2
+	print (timeEnd)
+	print (timeStart)
+	print (trainLenght)
+	
+	a = raw_input()
+	distance = trainLenght * sounds_Speed / 2
 	distance = round(distance, 3)
+	if distance >=100:
+		distance =distance /100
+		unit = 'm'
+	else:
+		unit = 'cm'
+		distance = "%.3f %s" % (distance, unit)
 	return distance
 	
 def distanceCheckerThread(args1, stopEvent):
-	while (not stopEvent.is_set()):
+	while (True):
 		print (colored("*********************************************************************", 'red'))
 		firePulseTrain()
 		x = waitForEcho()
-		
+		time.sleep(2)
 		print (colored("*********************************************************************", 'red'))
 	
 
@@ -120,8 +134,7 @@ def get_x_rotation(x,y,z):
 	return math.degrees(radians)
 	
 def configBluetooth():
-	global server_sock
-	global port
+	global server_sock, port
 	server_sock=BluetoothSocket( RFCOMM )
 	server_sock.bind(("",2))
 	server_sock.listen(1)
@@ -146,7 +159,8 @@ def waitConnection():
 	print ("Socket: ", client_sock)
 
 def timer():
-	os.system('clear')
+	#os.system('clear')
+	global distance
 	gyro_xout = read_word_2c(0x43)
 	gyro_yout = read_word_2c(0x45)
 	gyro_zout = read_word_2c(0x47)
@@ -180,6 +194,7 @@ def timer():
 	print (colored ('\n'.join((fofo % header,
 					 '-|-'.join( longg[i]*'-' for i in xrange(6)),
 					 '\n'.join(fofo % (a,b,c,d,e,f) for (a,b,c,d,e),f in mylist))), 'green'))
+	print (colored("Distance: %s" % distance, 'green'))
 	###
 	
 	tiltX = math.fabs(tiltX)
@@ -234,37 +249,11 @@ if __name__ == '__main__':
 	time.sleep(1)
 	
 	
-	###
-	
-	
-	'''
-	GPIO.setmode(GPIO.BCM)
-	GPIO.setwarnings(False)
-	
-	GPIO.setup(24, GPIO.OUT)
-	GPIO.output(24, False)
-	
-	time.sleep(1)
-	
-	print (colored("Accelerometer Beispiel!", 'red'))
-	for i in range(3):
-		print (colored("Axx!", 'green'))
-		GPIO.output(24, True)
-		time.sleep(3)
-		print (colored("Axx!", 'red'))
-		GPIO.output(24, False)
-		time.sleep(3)
-	GPIO.cleanup()
-	#sys.exit(0)
-	'''
-	###
-	
-	
 	#set the listener to the Ctrl+C event
-	signal.signal(signal.SIGINT, signalHandler)
+	###signal.signal(signal.SIGINT, signalHandler)
 	prepareUltraSoundPins()
 	threadStoper = threading.Event()
 	HC_SR04 = threading.Thread(target = distanceCheckerThread, args=(1, threadStoper))
 	#run a thread for the distance
 	HC_SR04.start()
-	#timer()
+	timer()
