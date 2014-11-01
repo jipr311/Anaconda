@@ -43,10 +43,11 @@ server_sock = 0
 client_sock = 0
 
 #ultrasound Variable
-TriggerPin = 24
-EchoPin = 23
+
 distance = '---'
-sounds_Speed = 34300
+SOUNDS_SPEED = 34300
+TRIGGER = 24
+ECHO = 23
 
 def signalHandler(signal, frame):
 	print("Code interupted!")
@@ -71,55 +72,46 @@ def read_word_2c(adr):
 def prepareUltraSoundPins():
 	GPIO.setmode(GPIO.BCM)
 	GPIO.setwarnings(False)
-	global TriggerPin, EchoPin
-
-	GPIO.setup(TriggerPin, GPIO.OUT)
-	GPIO.setup(EchoPin, GPIO.IN)
-	
-	GPIO.output(TriggerPin, False)
+	global TRIGGER, ECHO
+	print (colored("calculating distance", 'green'))
+	GPIO.setup(TRIGGER, GPIO.OUT)
+	GPIO.setup(ECHO, GPIO.IN)
+	GPIO.output(TRIGGER, False)
 	time.sleep(2)
 	print (colored("GPIO ready for use...", 'green'))
 	
 	
-def firePulseTrain():
-	global TriggerPin
-	GPIO.output(TriggerPin, True)
+def calculte():
+	#os.system('clear')
+	global TRIGGER, ECHO, SOUNDS_SPEED, distance	
+	GPIO.output(TRIGGER, True)
 	time.sleep(0.00001)
-	GPIO.output(TriggerPin, False)
-	print (colored("Pulse's Train fired!", 'green'))
+	GPIO.output(TRIGGER, False)
 	
-def waitForEcho():
-	global distance, EchoPin, soundsSpeed
-	print (colored("Listening for Echo", 'green'))
-	timeStart = 0
-	timeEnd = 0
-	while GPIO.input(EchoPin) == 0:
-		timeStart = time.time()
-	while GPIO.input(EchoPin) == 1:
-		timeEnd = time.time()
-	trainLenght = timeEnd - timeStart
-	print (timeEnd)
-	print (timeStart)
-	print (trainLenght)
-	
-	a = raw_input()
-	distance = trainLenght * sounds_Speed / 2
+	while GPIO.input(ECHO) == 0:
+		startsTime = time.time()
+	while GPIO.input(ECHO) == 1:
+		endsTime = time.time()
+	pulseDuration = endsTime-startsTime
+	 
+	distance = pulseDuration *  SOUNDS_SPEED / 2
 	distance = round(distance, 3)
-	if distance >=100:
-		distance =distance /100
+	unit = '-'
+	if distance >= 100:
+		distance = distance/100
 		unit = 'm'
 	else:
 		unit = 'cm'
-		distance = "%.3f %s" % (distance, unit)
-	return distance
+	distance = "%s %s" % (distance, unit)
+	#GPIO.cleanup()	
+	#print (colored("Distance: %s" % (distance), 'red'))
 	
 def distanceCheckerThread(args1, stopEvent):
-	while (True):
-		print (colored("*********************************************************************", 'red'))
-		firePulseTrain()
-		x = waitForEcho()
+	while True:
+		calculte()
 		time.sleep(2)
-		print (colored("*********************************************************************", 'red'))
+		#time.sleep(2)
+		#print (colored("*********************************************************************", 'red'))
 	
 
 def dist(a,b):
@@ -159,7 +151,7 @@ def waitConnection():
 	print ("Socket: ", client_sock)
 
 def timer():
-	#os.system('clear')
+	os.system('clear')
 	global distance
 	gyro_xout = read_word_2c(0x43)
 	gyro_yout = read_word_2c(0x45)
