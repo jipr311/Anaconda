@@ -100,18 +100,6 @@ def timer():
 	gyro_yout = read_word_2c(0x45)
 	gyro_zout = read_word_2c(0x47)
 	
-	'''
-	print "gyro_xout: ", gyro_xout, " scaled: ", (gyro_xout / 131)
-	print "gyro_yout: ", gyro_yout, " scaled: ", (gyro_yout / 131)
-	print "gyro_zout: ", gyro_zout, " scaled: ", (gyro_zout / 131)
-	
-	print colored("Giroscopio en X: %d" % (gyro_xout / 131), 'green')
-	print colored("Giroscopio en Y: %d" % (gyro_yout / 131), 'green')
-	print colored("Giroscopio en Z: %d" % (gyro_zout / 131), 'green')
-	print
-	print colored("Beschleunigungsdata:",'red')
-	print colored("------------------------------------",'red')
-	'''
 	accel_xout = read_word_2c(0x3b)
 	accel_yout = read_word_2c(0x3d)
 	accel_zout = read_word_2c(0x3f)
@@ -123,23 +111,7 @@ def timer():
 	tiltX = get_x_rotation(accel_xout_scaled, accel_yout_scaled, accel_zout_scaled)
 	tiltY = get_y_rotation(accel_xout_scaled, accel_yout_scaled, accel_zout_scaled)
 	
-	'''
-	print "accel_xout: ", accel_xout, " scaled: ", accel_xout_scaled
-	print "accel_yout: ", accel_yout, " scaled: ", accel_yout_scaled
-	print "accel_zout: ", accel_zout, " scaled: ", accel_zout_scaled
 
-	print "x rotation: " , get_x_rotation(accel_xout_scaled, accel_yout_scaled, accel_zout_scaled)
-	print "y rotation: " , get_y_rotation(accel_xout_scaled, accel_yout_scaled, accel_zout_scaled)
-	
-	print colored("Acceleracion en X escalada: %.11f" % accel_xout_scaled, 'red')
-	print colored("Acceleracion en Y escalada: %.11f" % accel_yout_scaled, 'red')
-	print colored("Acceleracion en Z escalada: %.11f" % accel_zout_scaled, 'red')
-	print
-	tiltX = get_x_rotation(accel_xout_scaled, accel_yout_scaled, accel_zout_scaled)
-	tiltY = get_y_rotation(accel_xout_scaled, accel_yout_scaled, accel_zout_scaled)
-	print colored("X rotation: \t%.3f °" % tiltX, 'red')
-	print colored("Y rotation: \t%.3f °" % tiltY, 'red')
-	'''
 	###
 	mylist = [ ( (gyro_xout, (gyro_xout / 131), "%.5f" % accel_xout_scaled, "%.3f" % tiltX, 30), 'X'),
            ( (gyro_yout, (gyro_yout / 131), "%.5f" % accel_yout_scaled, "%.3f" % tiltY, 30), 'Y'),
@@ -170,8 +142,8 @@ def timer():
 		
 		global client_sock
 		
-		client_sock.send(alarmMessage)
-		a= raw_input()
+		#client_sock.send(alarmMessage)
+		#a= raw_input()
 		#time.sleep(1)
 		
 		#print colored("***********************************************************", 'red')
@@ -183,8 +155,8 @@ def timer():
 		
 		global client_sock
 		
-		client_sock.send(alarmMessage)
-		a= raw_input()
+		#client_sock.send(alarmMessage)
+		#a= raw_input()
 		#time.sleep(1)
 	
 	threading.Timer(t, timer).start()
@@ -206,52 +178,8 @@ if __name__ == '__main__':
 	
 	#waitConnection()
 	
-	####
-	'''
-	server_sock=BluetoothSocket( RFCOMM )
-	server_sock.bind(("",2))
-	server_sock.listen(1)
-	 
-	port = server_sock.getsockname()[1]
-	
-	uuid = "fa87c0d0-afac-11de-8a39-0800200c9a66"
-	advertise_service( server_sock, "Notfall-Schuh",
-					   service_id = uuid,
-					   service_classes = [ uuid, SERIAL_PORT_CLASS ],
-					   profiles = [ SERIAL_PORT_PROFILE ] 
-						)
-	print ("Waiting for connection on RFCOMM channel %d" % port)
-	client_sock, client_info = server_sock.accept()
-	print ("Accepted connection from ", client_info)
-	print ("Socket: ", client_sock)
-	'''
-	####
-	#client_info = 0
-	#global client_sock
-	print (colored("Socket: ", 'green'))
-	#data = client_sock.recv(1024)
-	#print (colored(data, 'green'))
-	#time.sleep(1)
-	###client_sock.send("welcome!")
+	#print (colored("Socket: ", 'green'))
+
 	time.sleep(1)
-	#client_sock.send("welcome2!")
-	'''
-	while True:
-		data = '-'#client_sock.recv(1024)
-		if len(data) == 0:
-			print (colored("***********************************************************", 'green'))
-			client_sock.send("data=0!")
-		else:
-			print (("Socket: ", client_sock), end = '\r')
-			client_sock.send("Data######!")
-	'''
-	#a =raw_input()
-	
-	#data = client_sock.recv(1024)
-	#if len(data) == 0: 
-		#print colored("***********************************************************", 'green')
-	#print "Socket: ", client_sock
-	#client_sock.send(alarmMessage)
-	
-	#start the timer
+
 	timer()
