@@ -28,6 +28,8 @@ import os
 from termcolor import colored
 import threading
 
+import RPi.GPIO as GPIO
+
 from bluetooth import *
 import os
 import glob
@@ -39,6 +41,14 @@ alarmTiltThreshold= 30
 port = 0
 server_sock = 0
 client_sock = 0
+
+#ultrasound Variable
+TriggerPin = 23
+EchoPin = 24
+
+def signalHandler(signal, frame):
+	print("Code interupted!")
+	sys.exit(0)
 
 
 def read_byte(adr):
@@ -56,6 +66,47 @@ def read_word_2c(adr):
 		return -((65535 - val) + 1)
 	else:
 		return val
+
+def prepareUltraSoundPins():
+	GPIO.setmode(GPIO.BCM)
+	GPIO.setwarnings(False)
+	global TriggerPin, EchoPin
+	#TriggerPin = 23
+	#EchoPin = 24
+	GPIO.setup(TriggerPin, GPIO.OUT)
+	GPIO.setup(EchoPin, GPIO.IN)
+	GPIO.output(TriggerPin, False)
+	time.sleep(2)
+	print (colored("GPIO ready for use...", 'green'))
+	
+	
+def firePulseTrain():
+	global TriggerPin
+	GPIO.output(TriggerPin, True)
+	time.sleep(0.00001)
+	GPIO.output(TriggerPin, False)
+	print (colored("Pulse's Train fired!", 'green'))
+	
+def waitForEcho():
+	print (colored("Listening for Echo", 'green'))
+	while GPIO.input(EchoPin) == 0:
+		timeStart = time.time()
+	while GPIO.input(EchoPin) == 1:
+		timeEnd = time.time()
+	trainLenght = timeEnd - timeStart
+	soundsSpeed = 34300
+	distance = trainLenght * soundsSpeed / 2
+	distance = round(distance, 3)
+	return distance
+	
+def distanceCheckerThread(args1, stopEvent):
+	while (not stopEvent.is_set()):
+		print (colored("*********************************************************************", 'red'))
+		firePulseTrain()
+		x = waitForEcho()
+		
+		print (colored("*********************************************************************", 'red'))
+	
 
 def dist(a,b):
 	return math.sqrt((a*a)+(b*b))
@@ -112,7 +163,7 @@ def timer():
 	tiltY = get_y_rotation(accel_xout_scaled, accel_yout_scaled, accel_zout_scaled)
 	
 
-	###
+	### Table
 	mylist = [ ( (gyro_xout, (gyro_xout / 131), "%.5f" % accel_xout_scaled, "%.3f" % tiltX, 30), 'X'),
            ( (gyro_yout, (gyro_yout / 131), "%.5f" % accel_yout_scaled, "%.3f" % tiltY, 30), 'Y'),
            ( (gyro_zout, (gyro_zout / 131), "%.5f" % accel_zout_scaled, '----------------', '--------------'), 'Z')]
@@ -181,5 +232,39 @@ if __name__ == '__main__':
 	#print (colored("Socket: ", 'green'))
 
 	time.sleep(1)
-
-	timer()
+	
+	
+	###
+	
+	
+	'''
+	GPIO.setmode(GPIO.BCM)
+	GPIO.setwarnings(False)
+	
+	GPIO.setup(24, GPIO.OUT)
+	GPIO.output(24, False)
+	
+	time.sleep(1)
+	
+	print (colored("Accelerometer Beispiel!", 'red'))
+	for i in range(3):
+		print (colored("Axx!", 'green'))
+		GPIO.output(24, True)
+		time.sleep(3)
+		print (colored("Axx!", 'red'))
+		GPIO.output(24, False)
+		time.sleep(3)
+	GPIO.cleanup()
+	#sys.exit(0)
+	'''
+	###
+	
+	
+	#set the listener to the Ctrl+C event
+	signal.signal(signal.SIGINT, signalHandler)
+	prepareUltraSoundPins()
+	threadStoper = threading.Event()
+	HC_SR04 = threading.Thread(target = distanceCheckerThread, args=(1, threadStoper))
+	#run a thread for the distance
+	HC_SR04.start()
+	#timer()
