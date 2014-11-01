@@ -104,7 +104,7 @@ def calculte():
 		unit = 'cm'
 	distance = "%s %s" % (distance, unit)
 	#GPIO.cleanup()	
-	#print (colored("Distance: %s" % (distance), 'red'))
+	print (colored("Distance updated to: %s" % (distance), 'red'))
 	
 def distanceCheckerThread(args1, stopEvent):
 	while True:
