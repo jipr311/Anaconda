@@ -21,25 +21,45 @@
 #  MA 02110-1301, USA.
 #  
 #  
-import time
-import RPi.GPIO as GPIO
-import sys, os
+
 from termcolor import colored
+from dbus import glib
+import RPi.GPIO as GPIO
+
+import sys
+import os
+import time
+
+
 
 SOUNDS_SPEED = 34300
 TRIGGER = 24
 ECHO = 23
 def calculte():
-	os.system('clear')
-	global TRIGGER, ECHO	
+	#os.system('clear')
+	global TRIGGER, ECHO
+	top = 0	
 	GPIO.output(TRIGGER, True)
 	time.sleep(0.00001)
 	GPIO.output(TRIGGER, False)
+	#time.sleep(0.00001)
+	startsTime = time.time()
 	
 	while GPIO.input(ECHO) == 0:
 		startsTime = time.time()
+		#top += 1
+		#if top>5:
+			#break
+		
+	top = 0
+	endsTime = time.time()
 	while GPIO.input(ECHO) == 1:
 		endsTime = time.time()
+		#top +=1
+		
+		#if top>5:
+			#break
+		
 	pulseDuration = endsTime-startsTime
 	global SOUNDS_SPEED
 	distance = pulseDuration *  SOUNDS_SPEED / 2
@@ -66,6 +86,7 @@ def main():
 	while True:
 		calculte()
 		time.sleep(1)
+		print colored("****************", 'yellow')
 	GPIO.cleanup()
 	return 0
 
