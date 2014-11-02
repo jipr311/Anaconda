@@ -250,6 +250,9 @@ def timer():
 	distace = '???'
 	###
 	
+	alarmMessage = "x=%.3f--y=%.3f!" % (tiltX,tiltY)
+	client_sock.send(alarmMessage)
+	
 	tiltX = math.fabs(tiltX)
 	tiltY = math.fabs(tiltY)
 	
@@ -286,14 +289,14 @@ if __name__ == '__main__':
 	global HC_SR04
 	os.system('clear')
 	parser = argparse.ArgumentParser(description = 'Emergency-Shoe Notificator. \nGigatronik Mobile Solutions GmbH \nAuthor: José Pereira', formatter_class=RawTextHelpFormatter)
-	parser.add_argument('-x', '--x-tilt', dest ='X_TILT', default = 10, type =int, help = "Threshold value for the tilt on the X-Axis." )
-	parser.add_argument('-y', '--y-tilt', dest ='Y_TILT', default = 10, type =int, help = "Threshold value for the tilt on the Y-Axis." )
+	parser.add_argument('-x', '--x-tilt', dest ='X_TILT', default = 100, type =int, help = "Threshold value for the tilt on the X-Axis." )
+	parser.add_argument('-y', '--y-tilt', dest ='Y_TILT', default = 100, type =int, help = "Threshold value for the tilt on the Y-Axis." )
 	args = parser.parse_args()
 	xTiltThreshold = args.X_TILT
 	yTiltThreshold = args.Y_TILT
-	print (colored("Accelerometer Beispiel!", 'red'))
-	print (colored("Threshold X axis:! %d °" % xTiltThreshold, 'red'))
-	print (colored("Threshold Y axis:! %d °" % yTiltThreshold, 'red'))
+	print (colored("Sensor+OpenGL Beispiel!", 'red'))
+	#print (colored("Threshold X axis:! %d °" % xTiltThreshold, 'red'))
+	#print (colored("Threshold Y axis:! %d °" % yTiltThreshold, 'red'))
 	#sys.exit(1)
 	# Power management registers
 	power_mgmt_1 = 0x6b
@@ -313,13 +316,13 @@ if __name__ == '__main__':
 	
 	#set the listener to the Ctrl+C event
 	###signal.signal(signal.SIGINT, signalHandler)
-	prepareUltraSoundPins()
+	#prepareUltraSoundPins()
 	#threadStoper = threading.Event()
 	#HC_SR04 = threading.Thread(name = 'HC-SR04 Thread', target = distanceCheckerThread)
-	HC_SR04 = Process(name = 'HC-SR04 Thread', target = distanceCheckerThread, args =(distance, watchDog))
+	#HC_SR04 = Process(name = 'HC-SR04 Thread', target = distanceCheckerThread, args =(distance, watchDog))
 	#run a thread for the distance
 	#HC_SR04.setDaemon(True)
-	HC_SR04.start()
+	#HC_SR04.start()
 	
 	#HC_SR04.run()
 	
