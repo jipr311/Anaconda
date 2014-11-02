@@ -28,6 +28,7 @@ from termcolor import colored
 from multiprocessing import Process, Value, Array
 from bluetooth import *
 from argparse import *
+from Compass import *
 
 import smbus
 import math
@@ -42,11 +43,12 @@ import logging
 
  
 #variablen
-t = 0.6634
+t = 0.016634
 
 port = 0
 server_sock = 0
 client_sock = 0
+gyroCompass = Compass()
 
 
 def signalHandler(signal, frame):
@@ -106,6 +108,7 @@ def waitConnection():
 	print ("Accepted connection from ", client_info)
 
 def timer():
+	global gyroCompass
 	os.system('clear')
 
 	gyro_xout = read_word_2c(0x43)
@@ -142,8 +145,9 @@ def timer():
 					 '\n'.join(fofo % (a,b,c,d,e,f) for (a,b,c,d,e),f in mylist))), 'green'))
 	
 	###
-	
-	bluetoothMessage = "x=%.3f--y=%.3f!" % (tiltX,tiltY)
+	#print (colored (gyroCompass.readSensor() ,'red'))
+	z = gyroCompass.readSensor()
+	bluetoothMessage = "x=%.3f--y=%.3f--z=%3.f!" % (tiltX,tiltY, z)
 	client_sock.send(bluetoothMessage)
 		
 	threading.Timer(t, timer).start()
