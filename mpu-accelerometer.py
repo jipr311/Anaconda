@@ -209,18 +209,7 @@ def timer():
            ( (gyro_zout, (gyro_zout / 131), "%.5f" % accel_zout_scaled, '----------------', '--------------'), 'Z')]
 
 	header = ('xxxxxxxx','Scale','Beschleunigung','Rotationswinkel','Schwellenwert','Axis(%d:%d)'%(exceptionCounter,watchDog.value))
-	'''
-	if watchDog == prevValue:
-		exceptionCounter +=1
-		if exceptionCounter > 10:
-			exceptionCounter = 0
-			HC_SR04.process.terminate()
-			time.sleep(1)
-			HC_SR04.start()
-	else:
-		prevValue = watchDog
-		exceptionCounter =0
-	'''
+
 	longg = dict(zip((0,1,2,3,4,5),(len(str(x)) for x in header)))
 
 	for tu,x in mylist:
@@ -240,13 +229,7 @@ def timer():
 		unit = 'cm'
 	#distance = "%s %s" % (distance, unit)
 	print (colored("Distance: %s %s" % (distance.value, unit), 'green'))
-	#print (colored(HC_SR04, 'green'))
-	'''
-	if not HC_SR04.isAlive():
-		print (colored("thread D!! " , 'red'))
-	else:
-		print (colored("thread A!! " , 'green'))
-	'''
+
 	distace = '???'
 	###
 	

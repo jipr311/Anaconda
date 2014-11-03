@@ -49,6 +49,7 @@ port = 0
 server_sock = 0
 client_sock = 0
 gyroCompass = Compass()
+kompassEnabled = 0
 
 
 def signalHandler(signal, frame):
@@ -109,6 +110,7 @@ def waitConnection():
 
 def timer():
 	global gyroCompass
+	global kompassEnabled
 	os.system('clear')
 
 	gyro_xout = read_word_2c(0x43)
@@ -145,9 +147,12 @@ def timer():
 					 '\n'.join(fofo % (a,b,c,d,e,f) for (a,b,c,d,e),f in mylist))), 'green'))
 	
 	###
-	#print (colored (gyroCompass.readSensor() ,'red'))
+
 	z = gyroCompass.readSensor()
-	bluetoothMessage = "x=%.3f--y=%.3f--z=%3.f!" % (tiltX,tiltY, z)
+	if kompassEnabled == 1:
+		bluetoothMessage = "x=%.3f--y=%.3f--z=%3.f!" % (tiltX,tiltY, z)
+	else:
+		bluetoothMessage = "x=%.3f--y=%.3f--z=180.00!" % (tiltX,tiltY)
 	client_sock.send(bluetoothMessage)
 		
 	threading.Timer(t, timer).start()
@@ -156,8 +161,12 @@ if __name__ == '__main__':
 
 	os.system('clear')
 	parser = argparse.ArgumentParser(description = 'OpenGl Tilt Sensor Bluetooth. \nGigatronik Mobile Solutions GmbH \nAuthor: José Pereira', formatter_class=RawTextHelpFormatter)
-
+	parser.add_argument('--kompass', dest ='k_enabled', default = False, action='store_true', help = "Enable the compass sensor." )
+	parser.add_argument('--kein-kompass', dest ='k_enabled', default = False, action='store_false', help = "Disable the compass sensor." )
+	
 	args = parser.parse_args()
+	
+	kompassEnabled = args.k_enabled
 
 	print (colored("Sensor+OpenGL Beispiel!", 'red'))
 
