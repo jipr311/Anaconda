@@ -5,12 +5,12 @@
 #  
 #  
 
-from  Compass import *
+from  Parking import *
 
 def main():
-	c = Compass()
-	c.readSensor()
-	print c.readSensor()
+	p = Parking()
+	#p.calculte()
+	print p.calculte()
 	return 0
 
 if __name__ == '__main__':
